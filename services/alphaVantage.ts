@@ -1,6 +1,6 @@
 import axios from "axios";
 import Papa from "papaparse";
-import { API_KEY, BASE_URL } from "../config";
+import { API_KEY, BASE_URL } from "@env";
 
 export interface StockData {
   "Global Quote": {

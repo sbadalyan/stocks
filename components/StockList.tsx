@@ -30,7 +30,7 @@ const StockList = () => {
   }
 
   if (error) {
-    return <Text>Error</Text>;
+    return <Text>{error.message}</Text>;
   }
   
   return (
