@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 
-const useInvestments = () => {
+const useCats = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -21,14 +21,15 @@ const useInvestments = () => {
     setIsRefreshing(refreshing);
     setIsError(false);
     try {
-      const res = await fetch(`https://api.example.com/investments?page=${pageNumber}&limit=20`);
+      const res = await fetch(`https://catfact.ninja/facts?page=${pageNumber}&limit=30`);
       if(!res.ok){
         throw new Error('Api error');
       }
       const json = await res.json();
 
       setData(prev => refreshing ? json.data : [...prev, ...json.data]);
-      setTotalPages(json.pages);
+      const pages = Math.ceil(json.total / 30);
+      setTotalPages(pages);
 
     } catch(error) {
       setIsError(true);
@@ -58,4 +59,4 @@ const useInvestments = () => {
   return { data, currentPage, totalPages, fetchData, loadMore, refresh, isError, isRefreshing, isLoading};
 }
 
-export default useInvestments;
+export default useCats;

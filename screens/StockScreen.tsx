@@ -1,63 +1,58 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, View, Text } from 'react-native';
+import { useCallback } from 'react';
+import { View, Text, FlatList, ActivityIndicator, TextInput } from 'react-native';
+import useStock from '../hooks/useStock';
+import styles from './styles';
 
-type StockItemType = {
-  id: string;
-  symbol: string;
-  price: number;
-  change: number;
+type StockType = {
+  symbol: string,
+  name: string,
+  exchange: string,
+  country: string,
+  currency: string,
 };
 
-const StockRow = React.memo(({stock}: {stock: StockItemType }) => {
+const StockScreen = () => {
+  const {stockList, searchText, setSearchText, loading, isError} = useStock();
+  
+  const renderItem = useCallback(({item}: {item: StockType}) => {
+    return (
+      <View style={styles.stockItem}>
+        <Text>Name: {item.name}</Text>
+        <Text>Country: {item.country}</Text>
+        <Text>Currency: {item.currency}</Text>
+      </View>
+    );
+  }, []);
+
+  if(isError){
+    return <View><Text>Error...</Text></View>
+  }
+
+  if(loading){
+    return <ActivityIndicator size="large" />
+  }
+
   return (
-     <View style={{ padding: 16 }}>
-      <Text>{stock.symbol}</Text>
-      <Text>{stock.price}</Text>
-      <Text>{stock.change}%</Text>
+    <View style={styles.stockContent}>
+      <View style={styles.search}>
+        <TextInput 
+          value={searchText}
+          onChangeText={(value) => setSearchText(value)}
+          style={styles.searchInput}
+          placeholder='...'
+        />
+      </View>
+      <FlatList
+          data={stockList}
+          renderItem={renderItem}
+          keyExtractor={(item: StockType, index: number) => item.symbol+"-"+index}
+          windowSize={20}
+          initialNumToRender={50}
+          removeClippedSubviews
+          onEndReached={() => {console.log('end reached')}}
+        />
     </View>
   );
-});
+}
 
-const PortfolioScreen = ({ stocks }: {stocks: StockItemType[]}) => {
-
-  const [ data, setData ] = useState(stocks);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prevState => 
-        prevState.map(stock => {
-          const newPrice = stock.price + Math.random() - 0.5;
-          if(Math.abs(newPrice - stock.price) < 0.01){
-            return stock
-          } else {
-            return {
-              ...stock,
-              price: newPrice
-            }
-          }
-        })
-      );
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const renderRow = useCallback(({item}: {item: any}) => {
-    return <StockRow stock={item}/>;
-  }, []);
-
-  return (
-    <FlatList
-      data={data}
-      renderItem={renderRow}
-      keyExtractor={(item) => item.id.toString()}
-      getItemLayout={(_, index) => ({ length: 64, offset: 64*index, index })}
-      initialNumToRender={20}
-      windowSize={20}
-      removeClippedSubviews
-    />
-  );
-
-
-};
-export default PortfolioScreen;
+export default StockScreen;
